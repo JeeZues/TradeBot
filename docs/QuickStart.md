@@ -4,6 +4,7 @@ Quick Start... By Issac
 ## Download the code from github
 go to https://github.com/JeeZues/TradeBot/releases/latest and download the latest release
 
+![](img001.png "Download Latest Release")
 
 # Step #2:
 
@@ -14,6 +15,7 @@ Extract the downloaded files to a location of your choosing.. Example Extract to
 
 Open the run_config.py file in a text editor such as notepad or Notepad++ and follow the instructions.. You will need to create a 3commas api and binance api and enter the api information in that file. The  ‘account_name’ should be exactly what you called it in 3Comma’s when you setup your API to link 3comma’s to Binance.
 
+![](img002.png "Account Name")
 
 # Step #4:
 ensure you have python:
@@ -60,3 +62,4 @@ Python3 run.py --show_all --beep --colors --auto --keep_running --stop_at 1 --st
 # MISC Notes:
 If you want to keep the script from opening a specific pair that you have setup in 3commas but do not want to delete it for historical information add “- do not start” to the end of the name and the script will ignore that pair and not open/start it. 
 
+![](img003.png "Do Not Start")

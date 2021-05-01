@@ -1,7 +1,7 @@
 # TradeBot
 
 ## Latest Release
-Download source code from [releases/latest](releases/latest)
+Download source code from [https://github.com/JeeZues/TradeBot/releases/latest](https://github.com/JeeZues/TradeBot/releases/latest)
 
 ## Goal
 

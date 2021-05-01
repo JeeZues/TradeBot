@@ -13,7 +13,7 @@ Here we add more bots and once we get to the 10 positions, we stop all the other
 
 ## Quick start
 ### by Issac
-https://docs.google.com/document/d/18KG07spAS0_U8_APbUrIylvPIz4FORjKenITaJZE67Q/view
+[docs/QuickStart.md](docs/QuickStart.md)
 
 
 

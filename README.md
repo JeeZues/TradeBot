@@ -1,5 +1,8 @@
 # TradeBot
 
+## Latest Release
+Download source code from [releases/latest](releases/latest)
+
 ## Goal
 
 The goal here is to maximize the amount of positions you have while maintaining your safety levels when using Block Party Future Sniper bot with Binance Futures in 3Commas.

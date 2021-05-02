@@ -194,7 +194,7 @@ except Exception:
 #----------------------------------
 #----------------------------------
 #----------------------------------
-@timeout(100)
+@timeout(180)
 def run_account(account_id, api_key, api_secret):
 
     ret = {}

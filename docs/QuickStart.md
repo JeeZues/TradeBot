@@ -18,6 +18,7 @@ Open the run_config.py file in a text editor such as notepad or Notepad++ and fo
 
 ## Step #4:
 ensure you have python:
+Note that requirements.txt is needed from the extracted file above.
 
 ### Windows:
 open Command Prompt and type “python” and it should tell you what version you have installed, needs any version of python3, if you get an error you will need to install python. If python3 is installed you will also need to type in terminal “pip install -r requirements.txt” and it should download in Command Prompt.

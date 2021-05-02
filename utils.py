@@ -92,14 +92,16 @@ def show_positions(positions):
 
 
 def get_active_positions_count(positions, bots):
+    raw_count = 0
     count = 0
     for position in positions:
         if float(position['positionAmt']) != 0.0:
+            raw_count += 1
             for bot in bots:
                 if position['symbol'].replace('USDT','') == ''.join(bot['pairs']).replace('USDT_','') and bot['strategy'] == 'long':
                     count += int((float(bot['base_order_volume'])//10) - 1)
             count += 1
-    return count
+    return max(count, raw_count)
 
 
 def get_margin_ratio(a_data):

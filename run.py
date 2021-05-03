@@ -181,7 +181,7 @@ else:
     BLINK  = ''
     BOLD   = ''
 
-sig_top_list_ts = datetime.now() - timedelta(hours=2)
+sig_top_list_ts = datetime.now() - timedelta(hours=10)
 
 #----------------------------------
 
@@ -278,6 +278,21 @@ def run_account(account_id, api_key, api_secret):
 
     # Start/Stop Bots
     if args.auto:
+
+        # Get top list of pairs
+        top_list = []
+        if args.my_top_pairs:
+            top_list = args.my_top_pairs
+        if args.signal_top_pairs:
+            if sig_top_list_ts <= datetime.now() - timedelta(hours=3): # Update signal top list every hour
+                sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
+                top_list.extend(sig_top_list)
+        top_list = remove_duplicates_from_list(top_list)
+        if args.debug:
+            print(f"###################")
+            print(f"{top_list}")
+            print(f"###################")
+
         # Collect info...
         top_stopped_pairs = get_top_stopped_pairs(bots, account_id)
         totalMaintMargin = get_totalMaintMargin(account)
@@ -290,7 +305,7 @@ def run_account(account_id, api_key, api_secret):
         max_bots_running = (bots_pairs_to_start * args.bots_per_position_ratio) + len(started_bots_with_positions) #dynamic_bots_per_position_ratio
         start_up_to_bots = max_bots_running - active_bot_pair_count + active_positions_count
         start_up_to_bots = 0 if start_up_to_bots <= 0  else start_up_to_bots
-        started_bots_without_positions = get_started_bots_without_positions(bots, account_id, account['positions'])
+        started_bots_without_positions = get_started_bots_without_positions(bots, account_id, account['positions'], top_list)
         count_of_started_bots_without_positions = len(started_bots_without_positions)
         need_to_stop = active_bot_pair_count - max_bots_running
         if args.debug:
@@ -368,20 +383,6 @@ def run_account(account_id, api_key, api_secret):
 
                         #count_of_started_bots_without_positions = len(started_bots_without_positions)
                         max_bots_running = max_bots_running - count_of_started_bots_without_positions
-
-                        top_list = []
-                        if args.my_top_pairs:
-                            #top_list.extend(args.my_top_pairs)
-                            top_list = args.my_top_pairs
-                        if args.signal_top_pairs:
-                            if sig_top_list_ts <= datetime.now() - timedelta(hours=1): # Update signal top list every hour
-                                sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
-                                top_list.extend(sig_top_list)
-                        top_list = remove_duplicates_from_list(top_list)
-                        if args.debug:
-                            print(f"###################")
-                            print(f"{top_list}")
-                            print(f"###################")
 
                         if args.randomize_bots:
                             stopped_bots_without_positions = get_stopped_bots_without_positions_random(bots, account_id, account['positions'], top_list)

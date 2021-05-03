@@ -391,7 +391,7 @@ def get_count_of_started_bots_without_positions(bots, account_id, positions):
 
 
 # get a list of started bots without active positions
-def get_started_bots_without_positions(bots, account_id, positions):
+def get_started_bots_without_positions(bots, account_id, positions, top_list = []):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
         if float(position['positionAmt']) != 0.0:
@@ -402,7 +402,17 @@ def get_started_bots_without_positions(bots, account_id, positions):
         if account_id == bot['account_id'] and bot['strategy'] == "long" and bot['is_enabled'] and 'do not start' not in bot['name']:
             if ''.join(bot['pairs']).replace('USDT_','') not in positions_l:
                 bot_l.append(''.join(bot['pairs']).replace('USDT_',''))
-    return bot_l
+
+    res = []
+    for a_top_pair in reversed(top_list):
+        if a_top_pair in bot_l:
+            res.append(a_top_pair)
+    for a_bot_l in bot_l:
+        if a_bot_l not in res:
+            res.append(a_bot_l)
+
+    return res
+
 
 
 
@@ -418,6 +428,7 @@ def get_started_bots_with_positions(bots, account_id, positions):
         if account_id == bot['account_id'] and bot['strategy'] == "long" and bot['is_enabled'] and 'do not start' not in bot['name']:
             if ''.join(bot['pairs']).replace('USDT_','') in positions_l:
                 bot_l.append(''.join(bot['pairs']).replace('USDT_',''))
+
     return bot_l
 
 

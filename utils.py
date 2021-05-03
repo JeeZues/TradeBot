@@ -350,7 +350,6 @@ def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
     res = []
     for ssp in sorted_signal_pairs:
         res.append(ssp[0].replace('USDT_',''))
-    print(res)
     return res, ts
 
 def remove_duplicates_from_list(seq):

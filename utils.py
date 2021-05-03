@@ -5,7 +5,7 @@ from pprint import pprint
 import sys
 import time
 import run_config
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import gmtime, strftime
 import random
 from collections import Counter
@@ -322,9 +322,24 @@ def get_stopped_bots_without_positions_random(bots, account_id, positions, top_l
 
 
 # Get a list of top pairs with long signals
-def get_pairs_with_top_signals(marketplace_id = 195):
+def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
+    ts = datetime.now()
+    chunks = 1000
+    count = 0
+    max_c = round(max_signals/chunks)
+    signals = []
     signal_pairs = []
+    while True:
+        tsignals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS=f"?limit={chunks}&offset={chunks*count}")
+        count += 1
+        if len(tsignals) > 0 and count <= max_c:
+            signals.extend(tsignals)
+            #print(len(signals))
+        else:
+            break
+    '''
     signals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS="?limit=1000")
+    '''
     for signal in signals:
         if signal['signal_type'] == "long":
             signal_pairs.append(signal['pair'])
@@ -335,7 +350,8 @@ def get_pairs_with_top_signals(marketplace_id = 195):
     res = []
     for ssp in sorted_signal_pairs:
         res.append(ssp[0].replace('USDT_',''))
-    return res
+    print(res)
+    return res, ts
 
 def remove_duplicates_from_list(seq):
     seen = set()

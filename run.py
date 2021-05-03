@@ -9,7 +9,7 @@ from pprint import pprint
 import argparse
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import gmtime, strftime
 import signal
 import os
@@ -181,6 +181,7 @@ else:
     BLINK  = ''
     BOLD   = ''
 
+sig_top_list_ts = datetime.now() - timedelta(hours=2)
 
 #----------------------------------
 
@@ -198,7 +199,7 @@ except Exception:
 #----------------------------------
 @timeout(180)
 def run_account(account_id, api_key, api_secret):
-
+    global sig_top_list_ts
     ret = {}
 
     BinanceClient = Client(api_key, api_secret)
@@ -367,6 +368,21 @@ def run_account(account_id, api_key, api_secret):
 
                         #count_of_started_bots_without_positions = len(started_bots_without_positions)
                         max_bots_running = max_bots_running - count_of_started_bots_without_positions
+
+                        top_list = []
+                        if args.my_top_pairs:
+                            #top_list.extend(args.my_top_pairs)
+                            top_list = args.my_top_pairs
+                        if args.signal_top_pairs:
+                            if sig_top_list_ts <= datetime.now() - timedelta(hours=1): # Update signal top list every hour
+                                sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
+                                top_list.extend(sig_top_list)
+                        top_list = remove_duplicates_from_list(top_list)
+                        if args.debug:
+                            print(f"###################")
+                            print(f"{top_list}")
+                            print(f"###################")
+
                         if args.randomize_bots:
                             stopped_bots_without_positions = get_stopped_bots_without_positions_random(bots, account_id, account['positions'], top_list)
                         else:
@@ -480,6 +496,16 @@ except Exception:
     Binance_API_KEY = run_config.Binance_API_KEY
     Binance_API_SECRET = run_config.Binance_API_KEY
 
+'''
+print(Binance_API_KEY)
+print(Binance_API_SECRET)
+# Allow keys from shell env
+Binance_API_KEY = os.getenv('Binance_API_KEY', Binance_API_KEY)
+Binance_API_SECRET = os.getenv('Binance_API_SECRET', Binance_API_SECRET)
+print(Binance_API_KEY)
+print(Binance_API_SECRET)
+'''
+
 if not found_account:
     print(f"Error: could not find account with flag {args.binance_account_flag}")
     exit(1)
@@ -489,17 +515,6 @@ account, account_txt = getAccountID(account_name)
 if account == "" or account_txt == "":
     print("Error: Need to find account before proceeding...")
     exit(1)
-
-top_list = []
-if args.my_top_pairs:
-    top_list.extend(args.my_top_pairs)
-if args.signal_top_pairs:
-    top_list.extend(get_pairs_with_top_signals())
-top_list = remove_duplicates_from_list(top_list)
-if args.debug:
-    print(f"###################")
-    print(f"{top_list}")
-    print(f"###################")
 
 if args.keep_running:
     while True:

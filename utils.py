@@ -8,6 +8,7 @@ import run_config
 from datetime import datetime
 from time import gmtime, strftime
 import random
+from collections import Counter
 
 
 
@@ -271,7 +272,7 @@ def get_stopped_bots_with_positions(bots, account_id, positions):
 
 
 # sorted stopped bots without positions
-def get_stopped_bots_without_positions(bots, account_id, positions):
+def get_stopped_bots_without_positions(bots, account_id, positions, top_list = []):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
         if float(position['positionAmt']) != 0.0:
@@ -282,10 +283,20 @@ def get_stopped_bots_without_positions(bots, account_id, positions):
         if account_id == bot['account_id'] and bot['strategy'] == "long" and not bot['is_enabled'] and 'do not start' not in bot['name']:
             if ''.join(bot['pairs']).replace('USDT_','') not in positions_l:
                 bot_l.append(''.join(bot['pairs']).replace('USDT_',''))
-    return bot_l
+
+    res = []
+    for a_top_pair in top_list:
+        if a_top_pair in bot_l:
+            res.append(a_top_pair)
+    for a_bot_l in bot_l:
+        if a_bot_l not in res:
+            res.append(a_bot_l)
+
+    return res
 
 # Random stopped bots without positions
-def get_stopped_bots_without_positions_random(bots, account_id, positions):
+def get_stopped_bots_without_positions_random(bots, account_id, positions, top_list = []):
+    #print (top_list)
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
         if float(position['positionAmt']) != 0.0:
@@ -297,7 +308,40 @@ def get_stopped_bots_without_positions_random(bots, account_id, positions):
         if account_id == bot['account_id'] and bot['strategy'] == "long" and not bot['is_enabled'] and 'do not start' not in bot['name']:
             if ''.join(bot['pairs']).replace('USDT_','') not in positions_l:
                 bot_l.append(''.join(bot['pairs']).replace('USDT_',''))
-    return bot_l
+
+    res = []
+    for a_top_pair in top_list:
+        if a_top_pair in bot_l:
+            res.append(a_top_pair)
+    for a_bot_l in bot_l:
+        if a_bot_l not in res:
+            res.append(a_bot_l)
+
+    return res
+
+
+
+# Get a list of top pairs with long signals
+def get_pairs_with_top_signals(marketplace_id = 195):
+    signal_pairs = []
+    signals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS="?limit=1000")
+    for signal in signals:
+        if signal['signal_type'] == "long":
+            signal_pairs.append(signal['pair'])
+    #pprint(signal_pairs)
+    #count_dict = dict(Counter(signal_pairs).items()) 
+    #pprint(count_dict)
+    sorted_signal_pairs = Counter(signal_pairs).most_common()
+    res = []
+    for ssp in sorted_signal_pairs:
+        res.append(ssp[0].replace('USDT_',''))
+    return res
+
+def remove_duplicates_from_list(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
 
 
 # get count of stopped bots without active positions

@@ -19,6 +19,7 @@ class API3Commas():
             'panicSellDeal': {'url': '/public/api/ver1/deals/DEAL_ID/panic_sell', 'method': 'POST'},
             'disableBot': {'url': '/public/api/ver1/bots/BOT_ID/disable', 'method': 'POST'},
             'enableBot': {'url': '/public/api/ver1/bots/BOT_ID/enable', 'method': 'POST'},
+            'getMarketplaceSignals': {'url': '/public/api/ver1/marketplace/ITEM_ID/signalsOPTIONS', 'method': 'GET'},
     }
     
     def __init__(self, API_KEY, API_SECRET):

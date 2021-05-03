@@ -146,7 +146,9 @@ parser.add_argument("--transfer_delta", help='Wait for balance delta before tran
 parser.add_argument("--beep", help='Beep when issues detected', action='store_true', default=None)
 parser.add_argument("--colors", help='Add colors if system supports it', action='store_true', default=None)
 
-#parser.add_argument("--pairs", help="A list of pairs ordered from best down, e.g. --pairs EOS ENJ AXS", nargs='+', default=None)
+parser.add_argument("--my_top_pairs", help="A list of pairs ordered from best down, e.g. --pairs EOS ENJ AXS", nargs='+', default=None)
+parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs', action='store_true', default=None)
+
 parser.add_argument("--keep_running", help='Loop forever (Ctrl+c to stop)', action='store_true', default=None)
 parser.add_argument("--keep_running_timer", help='Time to sleep between runs in seconds (default 60)', type=int, default=60)
 parser.add_argument("--keep_running_dynamic_timer", help='Adjust timer based on state to reduce load on APIs', action='store_true', default=None)
@@ -366,9 +368,9 @@ def run_account(account_id, api_key, api_secret):
                         #count_of_started_bots_without_positions = len(started_bots_without_positions)
                         max_bots_running = max_bots_running - count_of_started_bots_without_positions
                         if args.randomize_bots:
-                            stopped_bots_without_positions = get_stopped_bots_without_positions_random(bots, account_id, account['positions'])
+                            stopped_bots_without_positions = get_stopped_bots_without_positions_random(bots, account_id, account['positions'], top_list)
                         else:
-                            stopped_bots_without_positions = get_stopped_bots_without_positions(bots, account_id, account['positions'])
+                            stopped_bots_without_positions = get_stopped_bots_without_positions(bots, account_id, account['positions'], top_list)
                         if args.debug:
                             print("Pick min from:")
                             print(f"max_bots_running = {max_bots_running}")
@@ -447,7 +449,6 @@ def run_account(account_id, api_key, api_secret):
 
     if args.beep and margin_ratio >= args.stop_at:
         new_beep_time = round(beep_time * (1 + (margin_ratio - args.stop_at) * 10))
-        print(new_beep_time)
         beep(new_beep_time)
 
     ret['margin_ratio'] = margin_ratio
@@ -488,6 +489,17 @@ account, account_txt = getAccountID(account_name)
 if account == "" or account_txt == "":
     print("Error: Need to find account before proceeding...")
     exit(1)
+
+top_list = []
+if args.my_top_pairs:
+    top_list.extend(args.my_top_pairs)
+if args.signal_top_pairs:
+    top_list.extend(get_pairs_with_top_signals())
+top_list = remove_duplicates_from_list(top_list)
+if args.debug:
+    print(f"###################")
+    print(f"{top_list}")
+    print(f"###################")
 
 if args.keep_running:
     while True:

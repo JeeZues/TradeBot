@@ -197,6 +197,7 @@ except Exception:
 #----------------------------------
 #----------------------------------
 #----------------------------------
+#@timing
 @timeout(180)
 def run_account(account_id, api_key, api_secret):
     global sig_top_list_ts
@@ -228,18 +229,8 @@ def run_account(account_id, api_key, api_secret):
 
     margin_ratio = get_margin_ratio(account)
 
-    # Get bots in 100/page chunks
     if args.auto or args.show_bots or args.show_all:
-        chunks = 100
-        count = 0
-        bots = []
-        while True:
-            tbots=get3CommasAPI().getBots(OPTIONS=f"?limit={chunks}&offset={chunks*count}")
-            count += 1
-            if len(tbots) > 0:
-                bots.extend(tbots)
-            else:
-                break
+        bots = get_bots()
 
     # Show bot table
     if args.show_bots or args.show_all:

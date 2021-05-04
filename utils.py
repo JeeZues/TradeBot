@@ -51,11 +51,13 @@ def xstr(s):
 def xfloat(s):
     return 0.0 if s is None else float(s)
 
+#@timing
 def signal_handler(sig, frame):
     print('\nYou pressed Ctrl+C!')
     sys.exit(0)
 
 
+#@timing
 def countdown(t):
     #print("", end="\r")
     while t:
@@ -68,6 +70,7 @@ def countdown(t):
         t -= 1
 
 
+#@timing
 def beep(btime):
     for i in range(btime):
         sys.stdout.write('\r\a')
@@ -75,6 +78,7 @@ def beep(btime):
         time.sleep(0.5)
 
 
+#@timing
 def get_spot_balance(Client, coin = 'USDT'):
     coins = Client.get_all_coins_info()
     usdt_spot_total = 0.0
@@ -84,6 +88,7 @@ def get_spot_balance(Client, coin = 'USDT'):
     return usdt_spot_total
 
 
+#@timing
 def show_positions(positions):
     txt = f"Sym   Amt   entryPrice Margin     PNL       \n"
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -92,6 +97,7 @@ def show_positions(positions):
     return txt[:-1]
 
 
+#@timing
 def get_active_positions_count(positions, bots):
     raw_count = 0
     count = 0
@@ -105,11 +111,13 @@ def get_active_positions_count(positions, bots):
     return max(count, raw_count)
 
 
+#@timing
 def get_margin_ratio(a_data):
     return float(a_data['totalMaintMargin']) / float(a_data['totalMarginBalance']) * 100
 
 
 
+#@timing
 def get_availableBalance(a_data, asset = 'USDT'):
     balance = 0.0
     for asset in a_data['assets']:
@@ -118,18 +126,40 @@ def get_availableBalance(a_data, asset = 'USDT'):
     return balance
 
 
+#@timing
 def get_totalMarginBalance(a_data):
     return float(a_data['totalMarginBalance'])
 
 
+#@timing
 def get_totalMaintMargin(a_data):
     return float(a_data['totalMaintMargin'])
 
 
+#@timing
 def get_max_bot_pairs(balance, pair_allowance):
     return balance/pair_allowance
 
 
+#@timing
+def get_bots():
+    # Get bots in 100/page chunks
+    chunks = 100
+    count = 0
+    bots = []
+    while True:
+        tbots=get3CommasAPI().getBots(OPTIONS=f"?limit={chunks}&offset={chunks*count}")
+        count += 1
+        if len(tbots) > 0:
+            bots.extend(tbots)
+        else:
+            break
+        if len(tbots) < chunks:
+            break
+    return bots
+
+
+#@timing
 def show_bots(bots, account_id):
     total = 0.0
     txt = f"\u2B9E {'Pair':<6} {'M':2} {'AD':<3} {'Total':<7} {'L/S':<5} {'Bot Name':<25}\n"
@@ -149,6 +179,7 @@ def show_bots(bots, account_id):
     return txt[:-1]
 
 
+#@timing
 def list_bot_pairs(bots, account_id, strategy = "long"):
     txt = ""
     #for bot in sorted(bots, key=lambda k: (float(k['finished_deals_profit_usd']))):
@@ -159,6 +190,7 @@ def list_bot_pairs(bots, account_id, strategy = "long"):
     return txt[:-1]
 
 
+#@timing
 def get_bot_pair_count(bots, account_id):
     a_count = 0
     count = 0
@@ -173,6 +205,7 @@ def get_bot_pair_count(bots, account_id):
     return count, a_count, dns_count
 
 
+#@timing
 def stop_all_bots(bots, account_id, dry):
     for bot in sorted(bots, key=lambda k: (''.join(k['pairs']))):
         if account_id == bot['account_id']:
@@ -191,6 +224,7 @@ def stop_all_bots(bots, account_id, dry):
                 pass
 
 
+#@timing
 def start_all_bots(bots, account_id, dry):
     for bot in sorted(bots, key=lambda k: (''.join(k['pairs']))):
         #if args.binance_account_flag in bot['account_name']:
@@ -210,6 +244,7 @@ def start_all_bots(bots, account_id, dry):
 
 
 # Maybe can combine both functions with default None
+#@timing
 def start_bot_pair(bots, account_id, pair_to_start, dry):
     for bot in sorted(bots, key=lambda k: (''.join(k['pairs']))):
         #if args.binance_account_flag in bot['account_name']:
@@ -228,6 +263,7 @@ def start_bot_pair(bots, account_id, pair_to_start, dry):
                     print("")
 
 
+#@timing
 def stop_bot_pair(bots, account_id, pair_to_stop, dry):
     for bot in sorted(bots, key=lambda k: (''.join(k['pairs']))):
         #if args.binance_account_flag in bot['account_name']:
@@ -245,6 +281,7 @@ def stop_bot_pair(bots, account_id, pair_to_stop, dry):
 
 
 # Get sorted list of stopped pairs by profit accounting for multiplier...
+#@timing
 def get_top_stopped_pairs(bots, account_id):
     l = []
     for bot in sorted(bots, key=lambda k: (float(k['finished_deals_profit_usd'])/float(k['base_order_volume'])), reverse = True):
@@ -257,6 +294,7 @@ def get_top_stopped_pairs(bots, account_id):
 
 # Combine both with and without functions
 # stopped bots with positions
+#@timing
 def get_stopped_bots_with_positions(bots, account_id, positions):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -272,6 +310,7 @@ def get_stopped_bots_with_positions(bots, account_id, positions):
 
 
 # sorted stopped bots without positions
+#@timing
 def get_stopped_bots_without_positions(bots, account_id, positions, top_list = []):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -295,6 +334,7 @@ def get_stopped_bots_without_positions(bots, account_id, positions, top_list = [
     return res
 
 # Random stopped bots without positions
+#@timing
 def get_stopped_bots_without_positions_random(bots, account_id, positions, top_list = []):
     #print (top_list)
     positions_l = []
@@ -322,6 +362,7 @@ def get_stopped_bots_without_positions_random(bots, account_id, positions, top_l
 
 
 # Get a list of top pairs with long signals
+#@timing
 def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
     ts = datetime.now()
     chunks = 1000
@@ -330,9 +371,11 @@ def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
     signals = []
     signal_pairs = []
     while True:
-        tsignals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS=f"?limit={chunks}&offset={chunks*count}")
         count += 1
-        if len(tsignals) > 0 and count <= max_c:
+        if count > max_c:
+            break
+        tsignals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS=f"?limit={chunks}&offset={chunks*count}")
+        if len(tsignals) > 0:
             signals.extend(tsignals)
             #print(len(signals))
         else:
@@ -352,14 +395,15 @@ def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
         res.append(ssp[0].replace('USDT_',''))
     return res, ts
 
+#@timing
 def remove_duplicates_from_list(seq):
     seen = set()
     seen_add = seen.add
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-
 # get count of stopped bots without active positions
+#@timing
 def get_count_of_stopped_bots_without_positions(bots, account_id, positions):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -375,6 +419,7 @@ def get_count_of_stopped_bots_without_positions(bots, account_id, positions):
 
 
 # get count of started bots without active positions
+#@timing
 def get_count_of_started_bots_without_positions(bots, account_id, positions):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -391,6 +436,7 @@ def get_count_of_started_bots_without_positions(bots, account_id, positions):
 
 
 # get a list of started bots without active positions
+#@timing
 def get_started_bots_without_positions(bots, account_id, positions, top_list = []):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -415,8 +461,8 @@ def get_started_bots_without_positions(bots, account_id, positions, top_list = [
 
 
 
-
 # get a list of started bots with active positions
+#@timing
 def get_started_bots_with_positions(bots, account_id, positions):
     positions_l = []
     for position in sorted(positions, key=lambda k: (k['symbol'])):
@@ -458,6 +504,7 @@ def getAccountID(binance_account_flag):
 
 
 
+#@timing
 def show_deals(deals):
 
     # Get field from structure

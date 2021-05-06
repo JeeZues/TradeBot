@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-from binance_api import Binance
+from python_binance.binance.client import Client
 from tcommas_api import API3Commas
 from utils import *
 from pprint import pprint
@@ -38,7 +38,9 @@ if (args.all and args.binance_account_flag) or (not args.all and not args.binanc
 #----------------------------------
 
 def stop_account(account_id, api_key, api_secret):
-    account=getBinanceAPI(api_key, api_secret).futuresAccount()
+    #account=getBinanceAPI(api_key, api_secret).futuresAccount()
+    BinanceClient = Client(api_key, api_secret)
+    account = BinanceClient.futures_account()
 
     chunks = 100
     count = 0

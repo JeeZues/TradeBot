@@ -149,7 +149,8 @@ parser.add_argument("--beep", help='Beep when issues detected', action='store_tr
 parser.add_argument("--colors", help='Add colors if system supports it', action='store_true', default=None)
 
 parser.add_argument("--my_top_pairs", help="A list of pairs ordered from best down, e.g. --pairs EOS ENJ AXS", nargs='+', default=None)
-parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs', action='store_true', default=None)
+parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs ***deprecated, use --signal_top_pairs_rnd 1***', action='store_true', default=None)
+parser.add_argument("--signal_top_pairs_rnd", help='Use signal count from BlockParty to order pairs and randomize first n', type=int)
 
 parser.add_argument("--keep_running", help='Loop forever (Ctrl+c to stop)', action='store_true', default=None)
 parser.add_argument("--keep_running_timer", help='Time to sleep between runs in seconds (default 60)', type=int, default=60)
@@ -281,10 +282,15 @@ def run_account(account_id, api_key, api_secret):
         top_list = []
         if args.my_top_pairs:
             top_list = args.my_top_pairs
-        if args.signal_top_pairs:
+        if args.signal_top_pairs or args.signal_top_pairs_rnd:
             if sig_top_list_ts <= datetime.now() - timedelta(hours=3): # Update signal top list every hour
                 sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
                 top_list.extend(sig_top_list)
+        if args.signal_top_pairs_rnd:
+            top_list_rnd = top_list[:args.signal_top_pairs_rnd]
+            random.shuffle(top_list_rnd)
+            top_list = top_list_rnd + top_list[args.signal_top_pairs_rnd:]
+
         top_list = remove_duplicates_from_list(top_list)
         if args.debug:
             print(f"###################")

@@ -133,6 +133,8 @@ parser.add_argument("--bots_per_position_ratio", help='Open a max number of bots
 parser.add_argument("--binance_account_flag", help='Part of binance account name identifier', default="Main")
 parser.add_argument("--randomize_bots", help='Select pairs/bots to start in random order', action='store_true', default=None)
 
+parser.add_argument("--no_short", help='Do not start bots with short strategy, only start long', action='store_true', default=None)
+
 parser.add_argument("--show_all", help='Show all info', action='store_true', default=None)
 parser.add_argument("--show_positions", help='Show current open positions', action='store_true', default=None)
 parser.add_argument("--show_bots", help='Show bots details', action='store_true', default=None)
@@ -270,6 +272,11 @@ def run_account(account_id, api_key, api_secret):
     # Start/Stop Bots
     if args.auto:
 
+        strategy = ["long", "short"]
+        if args.no_short:
+            strategy = ["long"]
+
+
         # Get top list of pairs
         top_list = []
         if args.my_top_pairs:
@@ -341,7 +348,7 @@ def run_account(account_id, api_key, api_secret):
                         if not args.no_start:
                             for bot_to_start in stopped_bots_with_positions:
                                 print(f"Starting {bot_to_start} bot pairs...")
-                                start_bot_pair(bots, account_id, bot_to_start, args.dry)
+                                start_bot_pair(bots, account_id, bot_to_start, args.dry, strategy = strategy)
                     else:
                         print(f"{YELLOW}Hight margin_ratio, not starting any bots...{ENDC}")
                 else: # no stopped bots with positions to start, start from ones without active positions
@@ -400,7 +407,7 @@ def run_account(account_id, api_key, api_secret):
                                 burst_pairs_to_start = stopped_bots_without_positions[:actual_bots_to_start] # Assume list is sorted
                                 for bot_to_start in burst_pairs_to_start:
                                     print(f"Starting {bot_to_start} bot pairs...")
-                                    start_bot_pair(bots, account_id, bot_to_start, args.dry)
+                                    start_bot_pair(bots, account_id, bot_to_start, args.dry, strategy = strategy)
                             else:
                                 print(f"{YELLOW}Hight margin_ratio, not starting any bots...{ENDC}")
 

@@ -160,7 +160,7 @@ def get_bots():
 
 
 #@timing
-def show_bots(bots, account_id):
+def show_bots(bots, account_id, strategy = "long"):
     total = 0.0
     txt = f"\u2B9E {'Pair':<6} {'M':2} {'AD':<3} {'Total':<7} {'L/S':<5} {'Bot Name':<25}\n"
     #for bot in sorted(bots, key=lambda k: (str(k['is_enabled']), ''.join(k['pairs']), k['strategy'])):
@@ -225,10 +225,10 @@ def stop_all_bots(bots, account_id, dry):
 
 
 #@timing
-def start_all_bots(bots, account_id, dry):
+def start_all_bots(bots, account_id, dry, strategy = ["long", "short"]):
     for bot in sorted(bots, key=lambda k: (''.join(k['pairs']))):
         #if args.binance_account_flag in bot['account_name']:
-        if account_id == bot['account_id']:
+        if account_id == bot['account_id'] and bot['strategy'] in strategy:
             if bot['is_enabled'] or 'do not start' in bot['name']:
                 pass # nothing to do
             else:
@@ -245,10 +245,10 @@ def start_all_bots(bots, account_id, dry):
 
 # Maybe can combine both functions with default None
 #@timing
-def start_bot_pair(bots, account_id, pair_to_start, dry):
+def start_bot_pair(bots, account_id, pair_to_start, dry, strategy = ["long", "short"]):
     for bot in sorted(bots, key=lambda k: (''.join(k['pairs']))):
         #if args.binance_account_flag in bot['account_name']:
-        if account_id == bot['account_id']:
+        if account_id == bot['account_id'] and bot['strategy'] in strategy:
             if bot['is_enabled'] or 'do not start' in bot['name'] or not ''.join(bot['pairs']).endswith(pair_to_start):
                 pass # nothing to do
             else:

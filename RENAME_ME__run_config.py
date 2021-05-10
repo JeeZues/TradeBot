@@ -12,8 +12,15 @@ one per account/sub
 Binance_APIs = [
     {
          'account_name': 'Binance Futures - Main'
-        ,'Binance_API_KEY': ''
-        ,'Binance_API_SECRET': ''
+        ,'Binance_API_KEY': 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ,'Binance_API_SECRET': 'BBBBBBBBBBBBBBBBBBBBBBBB'
+        # Optional argument name and value to override command line ones if multiple flags are used.
+        ,'dry': True
+        ,'stop_at': 1.0
+        ,'start_at': 0.75
+        ,'bots_per_position_ratio': 5
+        ,'my_top_pairs': ['BTC','STORJ','DODG']
+        ,'no_short': True
     }
     ,{
          'account_name': 'Binance Futures - Sub 01'

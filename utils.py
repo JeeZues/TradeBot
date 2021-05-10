@@ -284,7 +284,7 @@ def stop_bot_pair(bots, account_id, pair_to_stop, dry):
 #@timing
 def get_top_stopped_pairs(bots, account_id):
     l = []
-    for bot in sorted(bots, key=lambda k: (float(k['finished_deals_profit_usd'])/float(k['base_order_volume'])), reverse = True):
+    for bot in sorted(bots, key=lambda k: (xfloat(k['finished_deals_profit_usd'])/xfloat(k['base_order_volume'])), reverse = True):
         #if args.binance_account_flag in bot['account_name'] and bot['strategy'] == "long" and not bot['is_enabled'] and 'do not start' not in bot['name']:
         if account_id == bot['account_id'] and bot['strategy'] == "long" and not bot['is_enabled'] and 'do not start' not in bot['name']:
             l.append(''.join(bot['pairs']).replace('USDT_',''))

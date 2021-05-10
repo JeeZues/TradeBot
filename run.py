@@ -130,7 +130,7 @@ parser.add_argument("--stop_at", help='Stop bots when Margin Ratio >= value', ty
 parser.add_argument("--start_at", help='Start bots when Margin Ratio <= value', type=float, default=1.5) # not really used currently
 parser.add_argument("--bot_start_bursts", help='Number of bots to start each time', type=int, default=3)
 parser.add_argument("--bots_per_position_ratio", help='Open a max number of bots ratio for each needed position', type=int, default=3)
-parser.add_argument("--binance_account_flag", help='Part of binance account name identifier', default="Main")
+parser.add_argument("--binance_account_flag", help='A list of binance partial account names identifiers', nargs='+', default=["Main"])
 parser.add_argument("--randomize_bots", help='Select pairs/bots to start in random order', action='store_true', default=None)
 
 parser.add_argument("--no_short", help='Do not start bots with short strategy, only start long', action='store_true', default=None)
@@ -156,6 +156,9 @@ parser.add_argument("--keep_running", help='Loop forever (Ctrl+c to stop)', acti
 parser.add_argument("--keep_running_timer", help='Time to sleep between runs in seconds (default 60)', type=int, default=60)
 parser.add_argument("--keep_running_dynamic_timer", help='Adjust timer based on state to reduce load on APIs', action='store_true', default=None)
 parser.add_argument("--no_start", help='Run in safe mode (as a backup) with different values to make sure to stop (and not start) bots', action='store_true', default=None)
+
+parser.add_argument("--report", help='Log summary report of each account', action='store_true', default=None)
+
 parser.add_argument("--debug", help='debug', action='store_true', default=None)
 parser.add_argument("--verbose", help='Verbose output', action='store_true', default=None)
 
@@ -201,8 +204,8 @@ except Exception:
 #----------------------------------
 #----------------------------------
 #@timing
-@timeout(180)
-def run_account(account_id, api_key, api_secret):
+@timeout(300)
+def run_account(account_id, bots, api_key, api_secret):
     global sig_top_list_ts
     ret = {}
 
@@ -232,9 +235,11 @@ def run_account(account_id, api_key, api_secret):
 
     margin_ratio = get_margin_ratio(account)
 
+    '''
     if args.auto or args.show_bots or args.show_all:
         bots = get_bots()
-
+    '''
+    
     # Show bot table
     if args.show_bots or args.show_all:
         try:
@@ -298,7 +303,7 @@ def run_account(account_id, api_key, api_secret):
             print(f"###################")
 
         # Collect info...
-        top_stopped_pairs = get_top_stopped_pairs(bots, account_id)
+        #top_stopped_pairs = get_top_stopped_pairs(bots, account_id)
         totalMaintMargin = get_totalMaintMargin(account)
         max_bot_pairs = get_max_bot_pairs(totalMarginBalance, args.pair_allowance)
         total_bot_pair_count, active_bot_pair_count, dns_bot_pair_count = get_bot_pair_count(bots, account_id)
@@ -315,7 +320,7 @@ def run_account(account_id, api_key, api_secret):
         if args.debug:
             print (f"\tmargin_ratio = {margin_ratio}")
             print (f"\ttotalMaintMargin = {totalMaintMargin}")
-            print (f"\tlen(top_stopped_pairs) = {len(top_stopped_pairs)}")
+            #print (f"\tlen(top_stopped_pairs) = {len(top_stopped_pairs)}")
             print (f"\tmax_bot_pairs = {max_bot_pairs}")
             print (f"\ttotal_bot_pair_count = {total_bot_pair_count}")
             print (f"\tactive_bot_pair_count = {active_bot_pair_count}")
@@ -337,6 +342,9 @@ def run_account(account_id, api_key, api_secret):
         print(f"Margin Balance = ${totalMarginBalance:<.2f} (${totalMaintMargin:<.2f}) : USDT Furures (Spot) = ${availableBalanceUSDT:<.2f} $({usdt_spot_total_balance:<.2f})")
         print(f"Bots Active/Total: {active_bot_pair_count}/{total_bot_pair_count} ({dns_bot_pair_count} dns)")
         print(f"Positions delta ({bots_pairs_to_start}) = target ({round(max_bot_pairs)}) - running ({active_positions_count})")
+        ret['Margin Balance'] = f"Margin Balance = ${totalMarginBalance:<.2f} (${totalMaintMargin:<.2f}) : USDT Furures (Spot) = ${availableBalanceUSDT:<.2f} $({usdt_spot_total_balance:<.2f})"
+        ret['Bots Active/Total'] = f"Bots Active/Total: {active_bot_pair_count}/{total_bot_pair_count} ({dns_bot_pair_count} dns)"
+        ret['Positions delta'] = f"Positions delta ({bots_pairs_to_start}) = target ({round(max_bot_pairs)}) - running ({active_positions_count})"
         #if args.debug: print (f"start_up_to_bots = {start_up_to_bots}")
 
         if margin_ratio >= args.stop_at: # If MR is larger than or equals stop at, stop all bots...
@@ -446,6 +454,7 @@ def run_account(account_id, api_key, api_secret):
     print(f"{color}****************************{ENDC}")
     print(f"{color}*** Margin Ratio = {margin_ratio:0.2f}% ***{ENDC}")
     print(f"{color}****************************{ENDC}")
+    ret['margin_ratio_txt'] = f"{color}****************************{ENDC}\n{color}*** Margin Ratio = {margin_ratio:0.2f}% ***{ENDC}\n{color}****************************{ENDC}"
 
 
     # Show deals/positions table
@@ -460,6 +469,7 @@ def run_account(account_id, api_key, api_secret):
                 pprint(account)
             '''
             show_deals_positions_txt, zeroSO = show_deals_positions(deals, account['positions'], args.colors)
+            ret['show_deals_positions'] = show_deals_positions_txt
             print(show_deals_positions_txt)
             if "Error" in show_deals_positions_txt:
                 beep(beep_time)
@@ -485,21 +495,48 @@ signal.signal(signal.SIGINT, signal_handler)
 print ("-----------------------------------------------------------------")
 print ("-----------------------------------------------------------------")
 
+accountAPIs = []
 found_account = False
 try:
     _ = run_config.Binance_APIs
     for Binance_API in run_config.Binance_APIs:
-        #print(
-        if args.binance_account_flag in Binance_API['account_name']:
-            found_account = True
-            account_name = Binance_API['account_name']
-            Binance_API_KEY = Binance_API['Binance_API_KEY']
-            Binance_API_SECRET = Binance_API['Binance_API_SECRET']
+        # new, if all or in list...
+        for binance_account_flag in args.binance_account_flag:
+            if binance_account_flag in Binance_API['account_name']:
+                found_account = True
+                # old
+                '''
+                account_name = Binance_API['account_name']
+                Binance_API_KEY = Binance_API['Binance_API_KEY']
+                Binance_API_SECRET = Binance_API['Binance_API_SECRET']
+                '''
+                # new
+                account, account_txt = getAccountID(Binance_API['account_name'])
+                if account == "" or account_txt == "":
+                    print("Error: Need to find account before proceeding...")
+                    exit(1)
+
+                accountAPIs.append({
+                    'account_name': Binance_API['account_name']
+                    ,'Binance_API_KEY': Binance_API['Binance_API_KEY']
+                    ,'Binance_API_SECRET': Binance_API['Binance_API_SECRET']
+                    ,'3Commas_Account_ID': account
+                    ,'3Commas_Account_Txt': f"{account_txt}"
+                    })
+
+except Exception as e:
+    print(e)
+    traceback.print_exc()
+    print("Make sure you have Binance_APIs setup in run_config.py")
+    exit(9)
+'''
 except Exception:
+    ### Deprecate and remove...
     found_account = True
     account_name = args.binance_account_flag
     Binance_API_KEY = run_config.Binance_API_KEY
     Binance_API_SECRET = run_config.Binance_API_KEY
+'''
 
 '''
 print(Binance_API_KEY)
@@ -515,20 +552,49 @@ if not found_account:
     print(f"Error: could not find account with flag {args.binance_account_flag}")
     exit(1)
 
+# new
+#for accountAPI in accountAPIs:
+#    account, account_txt = getAccountID(account_name)
 
+'''
 account, account_txt = getAccountID(account_name)
 if account == "" or account_txt == "":
     print("Error: Need to find account before proceeding...")
     exit(1)
+'''
 
+######
+###### Create function to look at all args.* and see if they are set in run_config.  If they are use value from either default or run_config???
+######
 if args.keep_running:
     while True:
         keep_running_timer = args.keep_running_timer
-        print (account_txt)
-        print ("-----------------------------------------------------------------")
+        #print (account_txt)
+        #print ("-----------------------------------------------------------------")
         try:
-            ret = run_account(account, Binance_API_KEY, Binance_API_SECRET)
-            if ret['margin_ratio'] > args.stop_at and args.keep_running_dynamic_timer:
+            bots = None
+            ret_margin_ratio = []
+            if args.auto or args.show_bots or args.show_all:
+                bots = get_bots()
+            for sub_account in accountAPIs:
+                print ("-----------------------------------------------------------------")
+                print (sub_account['3Commas_Account_Txt'])
+                print ("-----------------------------------------------------------------")
+                ret = run_account(sub_account['3Commas_Account_ID'], bots, sub_account['Binance_API_KEY'], sub_account['Binance_API_SECRET'])
+                ret_margin_ratio.append(ret['margin_ratio'])
+                if args.report:
+                    with open(f"run_report_{sub_account['3Commas_Account_ID']}.txt", "a") as myfile:
+                        print ("-----------------------------------------------------------------", file=myfile)
+                        print (sub_account['3Commas_Account_Txt'], file=myfile)
+                        print ("-----------------------------------------------------------------", file=myfile)
+                        print (ret['Margin Balance'], file=myfile)
+                        print (ret['Bots Active/Total'], file=myfile)
+                        print (ret['Positions delta'], file=myfile)
+                        print (ret['margin_ratio_txt'], file=myfile)
+                        print (ret['show_deals_positions'], file=myfile)
+                        print (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), file=myfile)
+            
+            if min(ret_margin_ratio) > args.stop_at and args.keep_running_dynamic_timer:
                 keep_running_timer *= 3
             sys.stdout.flush()
         except Exception as e:
@@ -548,9 +614,21 @@ if args.keep_running:
         print()
         print ("-----------------------------------------------------------------")
 else:
-    print (account_txt)
-    print ("-----------------------------------------------------------------")
-    run_account(account, Binance_API_KEY, Binance_API_SECRET)
+    #print (account_txt)
+    #print ("-----------------------------------------------------------------")
+    bots = None
+    try:
+        if args.auto or args.show_bots or args.show_all:
+            bots = get_bots()
+    except Exception as e:
+        print("Failed to get bots")
+        print(e)
+        traceback.print_exc()
+    for sub_account in accountAPIs:
+        print ("-----------------------------------------------------------------")
+        print (sub_account['3Commas_Account_Txt'])
+        print ("-----------------------------------------------------------------")
+        ret = run_account(sub_account['3Commas_Account_ID'], bots, sub_account['Binance_API_KEY'], sub_account['Binance_API_SECRET'])
     if args.dry:
         print("*************************")
         print("***Running in DRY mode***")

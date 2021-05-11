@@ -98,17 +98,15 @@ def show_positions(positions):
 
 
 #@timing
-def get_active_positions_count(positions, bots):
-    raw_count = 0
+def get_active_positions_count(positions, bots, account_id):
     count = 0
     for position in positions:
         if float(position['positionAmt']) != 0.0:
-            raw_count += 1
             for bot in bots:
-                if position['symbol'].replace('USDT','') == ''.join(bot['pairs']).replace('USDT_','') and bot['strategy'] == 'long':
+                if account_id == bot['account_id'] and position['symbol'].replace('USDT','') == ''.join(bot['pairs']).replace('USDT_','') and bot['strategy'] == 'long':
                     count += int((float(bot['base_order_volume'])//10) - 1)
             count += 1
-    return max(count, raw_count)
+    return count
 
 
 #@timing

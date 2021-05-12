@@ -42,9 +42,11 @@ tail -f nohup.out
 ```
 
 
-### If you find this useful, Buy me a Bubly
+### If you find this useful, buy me a snack
 ```
 ETH: 0xce998ec4898877e17492af9248014d67590c0f46
 BTC: 1BQT7tZxStdgGewcgiXjx8gFJAYA4yje6J
+LTC: LbG7p6AFCjYy8k7gBsNmwuYdUYR9QkNR65
+XTZ: tz1RvdxsdqQd1Udpugjb6qCP9wYJULLQk1DB
 ```
 

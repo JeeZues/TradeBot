@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import run_config # import settings from run_config.py
+#import run_config # import settings from run_config.py
 
 from python_binance.binance.client import Client # From https://github.com/sammchardy/python-binance/
 from tcommas_api import API3Commas
@@ -31,9 +31,11 @@ Here we add more bots and once we get to the 10 positions, we stop all the other
 
 
 
-If you find this useful, Buy me a Bubly:-
+If you find this useful, buy me a snack:-
 ETH: 0xce998ec4898877e17492af9248014d67590c0f46
 BTC: 1BQT7tZxStdgGewcgiXjx8gFJAYA4yje6J
+LTC: LbG7p6AFCjYy8k7gBsNmwuYdUYR9QkNR65
+XTZ: tz1RvdxsdqQd1Udpugjb6qCP9wYJULLQk1DB
 
 
 
@@ -114,7 +116,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--dry", help='Dry run, do not start/stop bots', action='store_true', default=None)
 parser.add_argument("--auto", help='Auto Stop/Start bots based on Margin Ratio', action='store_true', default=None)
 parser.add_argument("--stop_at", help='Stop bots when Margin Ratio >= value', type=float, default=2.5)
-parser.add_argument("--start_at", help='Start bots when Margin Ratio <= value', type=float, default=1.5) # not really used currently
+parser.add_argument("--start_at", help='Start bots when Margin Ratio <= value', type=float, default=1.5)
 parser.add_argument("--bot_start_bursts", help='Number of bots to start each time', type=int, default=3)
 parser.add_argument("--bots_per_position_ratio", help='Open a max number of bots ratio for each needed position', type=int, default=3)
 parser.add_argument("--binance_account_flag", help='A list of binance partial account names identifiers, use optional ALL_SUBS', nargs='+', default=["Main"])
@@ -146,6 +148,8 @@ parser.add_argument("--no_start", help='Run in safe mode (as a backup) with diff
 
 parser.add_argument("--report", help='Log summary report of each account', action='store_true', default=None)
 
+parser.add_argument("--config_filename", help='Use custom config file (default is run_config.py)', default="run_config.py")
+
 #parser.add_argument("--full_auto", help='Comming soon...Maybe!', action='store_true', default=None)
 
 parser.add_argument("--debug", help='debug', action='store_true', default=None)
@@ -153,6 +157,15 @@ parser.add_argument("--verbose", help='Verbose output', action='store_true', def
 
 args = parser.parse_args()
 
+
+
+#import run_config # import settings from run_config.py
+
+#config_file = "run_config"
+run_config = __import__(args.config_filename.rsplit( ".", 1 )[ 0 ])
+
+#pprint(run_config)
+#exit()
 
 if args.start_at >= args.stop_at:
     print("Error: start_at can't be more than or equal to stop_at")
@@ -556,7 +569,6 @@ while True:
     if not args.keep_running:
         break
     if args.beep and ret_beep:
-        print("beep...")
         beep(beep_time)
     countdown(keep_running_timer)
     print()

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-#import run_config # import settings from run_config.py
-
+import importlib.util
 from python_binance.binance.client import Client # From https://github.com/sammchardy/python-binance/
 from tcommas_api import API3Commas
 from utils import *
@@ -159,13 +158,13 @@ args = parser.parse_args()
 
 
 
-#import run_config # import settings from run_config.py
+# Allow importing run_config from different locations using path
+spec = importlib.util.spec_from_file_location("module.name", args.config_filename)
+run_config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(run_config)
+pprint(run_config)
+print(run_config.Binance_APIs)
 
-#config_file = "run_config"
-run_config = __import__(args.config_filename.rsplit( ".", 1 )[ 0 ])
-
-#pprint(run_config)
-#exit()
 
 if args.start_at >= args.stop_at:
     print("Error: start_at can't be more than or equal to stop_at")

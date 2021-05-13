@@ -364,6 +364,8 @@ def get_stopped_bots_without_positions_random(bots, account_id, positions, top_l
 def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
     ts = datetime.now()
     chunks = 1000
+    if max_signals < chunks:
+        chunks = max_signals
     count = 0
     max_c = round(max_signals/chunks)
     signals = []
@@ -375,22 +377,51 @@ def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
         tsignals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS=f"?limit={chunks}&offset={chunks*count}")
         if len(tsignals) > 0:
             signals.extend(tsignals)
-            #print(len(signals))
         else:
             break
-    '''
-    signals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS="?limit=1000")
-    '''
     for signal in signals:
         if signal['signal_type'] == "long":
             signal_pairs.append(signal['pair'])
-    #pprint(signal_pairs)
-    #count_dict = dict(Counter(signal_pairs).items()) 
-    #pprint(count_dict)
     sorted_signal_pairs = Counter(signal_pairs).most_common()
     res = []
     for ssp in sorted_signal_pairs:
         res.append(ssp[0].replace('USDT_',''))
+    return res, ts
+
+
+# Get a list of top pairs with long signals
+#@timing
+def get_pairs_with_top_signals_by_profit(marketplace_id = 195, max_signals = 5000, profit_indicator = 'min'):
+    import itertools, operator
+    ts = datetime.now()
+    chunks = 1000
+    if max_signals < chunks:
+        chunks = max_signals
+    count = 0
+    max_c = round(max_signals/chunks)
+    signals = []
+    signal_pairs = []
+    while True:
+        count += 1
+        if count > max_c:
+            break
+        tsignals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS=f"?limit={chunks}&offset={chunks*count}")
+        if len(tsignals) > 0:
+            signals.extend(tsignals)
+        else:
+            break
+    for signal in signals:
+        if signal['signal_type'] == "long":
+            signal_pairs.append({'pair':signal['pair'], 'profit_indicator': xfloat(signal[profit_indicator])})
+    
+    key = operator.itemgetter('pair')
+    
+    signal_pairs_grouped = [{'profit_indicator': sum(x['profit_indicator'] for x in g), 'pair': k} for k, g in itertools.groupby(sorted(signal_pairs, key=key), key=key)]
+    sorted_signal_pairs = sorted(signal_pairs_grouped, key=lambda k: -k['profit_indicator']) 
+
+    res = []
+    for ssp in sorted_signal_pairs:
+        res.append(ssp['pair'].replace('USDT_',''))
     return res, ts
 
 #@timing

@@ -37,27 +37,29 @@ if (args.all and args.binance_account_flag) or (not args.all and not args.binanc
 
 #----------------------------------
 
-def stop_account(account_id, api_key, api_secret):
+def stop_account(bots, account_id, api_key, api_secret):
     #account=getBinanceAPI(api_key, api_secret).futuresAccount()
     BinanceClient = Client(api_key, api_secret)
     account = BinanceClient.futures_account()
 
-    chunks = 100
-    count = 0
-    bots = []
-    while True:
-        tbots=get3CommasAPI().getBots(OPTIONS=f"?limit={chunks}&offset={chunks*count}")
-        count += 1
-        if len(tbots) > 0:
-            bots.extend(tbots)
-        else:
-            break
     stop_all_bots(bots, account_id, args.dry)
 
 
 #----------------------------------
 
 print ("-----------------------------------------------------------------")
+
+
+chunks = 100
+count = 0
+bots = []
+while True:
+    tbots=get3CommasAPI().getBots(OPTIONS=f"?limit={chunks}&offset={chunks*count}")
+    count += 1
+    if len(tbots) > 0:
+        bots.extend(tbots)
+    else:
+        break
 
 for Binance_API in run_config.Binance_APIs:
     if args.binance_account_flag and args.binance_account_flag in Binance_API['account_name']:
@@ -66,7 +68,7 @@ for Binance_API in run_config.Binance_APIs:
         Binance_API_SECRET = Binance_API['Binance_API_SECRET']
         account, account_txt = getAccountID(account_name)
         print (account_txt)
-        stop_account(account, Binance_API_KEY, Binance_API_SECRET)
+        stop_account(bots, account, Binance_API_KEY, Binance_API_SECRET)
         print ("-----------------------------------------------------------------")
         break
     elif args.all:
@@ -75,7 +77,7 @@ for Binance_API in run_config.Binance_APIs:
         Binance_API_SECRET = Binance_API['Binance_API_SECRET']
         account, account_txt = getAccountID(account_name)
         print (account_txt)
-        stop_account(account, Binance_API_KEY, Binance_API_SECRET)
+        stop_account(bots, account, Binance_API_KEY, Binance_API_SECRET)
         print ("-----------------------------------------------------------------")
 
 

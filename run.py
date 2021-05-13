@@ -137,7 +137,7 @@ parser.add_argument("--beep", help='Beep when issues detected', action='store_tr
 parser.add_argument("--colors", help='Add colors if system supports it', action='store_true', default=None)
 
 parser.add_argument("--my_top_pairs", help="A list of pairs ordered from best down, e.g. --pairs EOS ENJ AXS", nargs='+', default=None)
-parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs ***deprecated, use --signal_top_pairs_rnd 1***', action='store_true', default=None)
+parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs (optional min or max to sory by profit %)',type=str, nargs='?', const="by_count", default=None)
 parser.add_argument("--signal_top_pairs_rnd", help='Use signal count from BlockParty to order pairs and randomize first n', type=int)
 
 parser.add_argument("--keep_running", help='Loop forever (Ctrl+c to stop)', action='store_true', default=None)
@@ -157,13 +157,12 @@ parser.add_argument("--verbose", help='Verbose output', action='store_true', def
 args = parser.parse_args()
 
 
-
 # Allow importing run_config from different locations using path
 spec = importlib.util.spec_from_file_location("module.name", args.config_filename)
 run_config = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(run_config)
-pprint(run_config)
-print(run_config.Binance_APIs)
+#pprint(run_config)
+#print(run_config.Binance_APIs)
 
 
 if args.start_at >= args.stop_at:
@@ -265,7 +264,10 @@ def run_account(account_dict, bots):
             top_list = account_dict['my_top_pairs']
         if account_dict['signal_top_pairs'] or account_dict['signal_top_pairs_rnd']:
             if sig_top_list_ts <= datetime.now() - timedelta(hours=3): # Update signal top list every hour
-                sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
+                if account_dict['signal_top_pairs'].lower() in ["min", "max"]:
+                    sig_top_list, sig_top_list_ts = get_pairs_with_top_signals_by_profit(profit_indicator = account_dict['signal_top_pairs'].lower())
+                else:
+                    sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
                 top_list.extend(sig_top_list)
         if account_dict['signal_top_pairs_rnd']:
             top_list_rnd = top_list[:account_dict['signal_top_pairs_rnd']]

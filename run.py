@@ -189,6 +189,7 @@ else:
     BOLD   = ''
 
 sig_top_list_ts = datetime.now() - timedelta(hours=10)
+signals_list = []
 
 #----------------------------------
 
@@ -211,6 +212,7 @@ def run_account(account_dict, bots):
     api_key = account_dict['Binance_API_KEY']
     api_secret = account_dict['Binance_API_SECRET']
     global sig_top_list_ts
+    global signals_list
     ret = {}
     ret['output'] = ""
     ret['beep'] = False
@@ -257,18 +259,18 @@ def run_account(account_dict, bots):
         if account_dict['no_short']:
             strategy = ["long"]
 
-
         # Get top list of pairs
         top_list = []
         if account_dict['my_top_pairs']:
             top_list = account_dict['my_top_pairs']
         if account_dict['signal_top_pairs'] or account_dict['signal_top_pairs_rnd']:
             if sig_top_list_ts <= datetime.now() - timedelta(hours=3): # Update signal top list every hour
-                if account_dict['signal_top_pairs'].lower() in ["min", "max"]:
-                    sig_top_list, sig_top_list_ts = get_pairs_with_top_signals_by_profit(profit_indicator = account_dict['signal_top_pairs'].lower())
-                else:
-                    sig_top_list, sig_top_list_ts = get_pairs_with_top_signals()
-                top_list.extend(sig_top_list)
+                signals_list, sig_top_list_ts = get_bot_signals()
+            if account_dict['signal_top_pairs'].lower() in ["min", "max"]:
+                sig_top_list = get_pairs_with_top_signals_by_profit(signals_list, profit_indicator = account_dict['signal_top_pairs'].lower())
+            else:
+                sig_top_list = get_pairs_with_top_signals(signals_list)
+            top_list.extend(sig_top_list)
         if account_dict['signal_top_pairs_rnd']:
             top_list_rnd = top_list[:account_dict['signal_top_pairs_rnd']]
             random.shuffle(top_list_rnd)

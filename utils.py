@@ -360,8 +360,8 @@ def get_stopped_bots_without_positions_random(bots, account_id, positions, top_l
 
 
 # Get a list of top pairs with long signals
-#@timing
-def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
+@timing
+def get_bot_signals(marketplace_id = 195, max_signals = 50):
     ts = datetime.now()
     chunks = 1000
     if max_signals < chunks:
@@ -379,6 +379,32 @@ def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
             signals.extend(tsignals)
         else:
             break
+    return signals, ts
+
+
+# Get a list of top pairs with long signals
+#@timing
+def get_pairs_with_top_signals(signals):
+    '''
+    ts = datetime.now()
+    chunks = 1000
+    if max_signals < chunks:
+        chunks = max_signals
+    count = 0
+    max_c = round(max_signals/chunks)
+    signals = []
+    signal_pairs = []
+    while True:
+        count += 1
+        if count > max_c:
+            break
+        tsignals = get3CommasAPI().getMarketplaceSignals(ITEM_ID=f"{marketplace_id}", OPTIONS=f"?limit={chunks}&offset={chunks*count}")
+        if len(tsignals) > 0:
+            signals.extend(tsignals)
+        else:
+            break
+    '''
+    signal_pairs = []
     for signal in signals:
         if signal['signal_type'] == "long":
             signal_pairs.append(signal['pair'])
@@ -386,13 +412,14 @@ def get_pairs_with_top_signals(marketplace_id = 195, max_signals = 5000):
     res = []
     for ssp in sorted_signal_pairs:
         res.append(ssp[0].replace('USDT_',''))
-    return res, ts
+    return res#, ts
 
 
 # Get a list of top pairs with long signals
 #@timing
-def get_pairs_with_top_signals_by_profit(marketplace_id = 195, max_signals = 5000, profit_indicator = 'min'):
+def get_pairs_with_top_signals_by_profit(signals, profit_indicator = 'min'):
     import itertools, operator
+    '''
     ts = datetime.now()
     chunks = 1000
     if max_signals < chunks:
@@ -410,6 +437,8 @@ def get_pairs_with_top_signals_by_profit(marketplace_id = 195, max_signals = 500
             signals.extend(tsignals)
         else:
             break
+    '''
+    signal_pairs = []
     for signal in signals:
         if signal['signal_type'] == "long":
             signal_pairs.append({'pair':signal['pair'], 'profit_indicator': xfloat(signal[profit_indicator])})
@@ -422,7 +451,7 @@ def get_pairs_with_top_signals_by_profit(marketplace_id = 195, max_signals = 500
     res = []
     for ssp in sorted_signal_pairs:
         res.append(ssp['pair'].replace('USDT_',''))
-    return res, ts
+    return res#, ts
 
 #@timing
 def remove_duplicates_from_list(seq):

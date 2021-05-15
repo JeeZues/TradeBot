@@ -266,7 +266,7 @@ def run_account(account_dict, bots):
         if account_dict['signal_top_pairs'] or account_dict['signal_top_pairs_rnd']:
             if sig_top_list_ts <= datetime.now() - timedelta(hours=3): # Update signal top list every hour
                 signals_list, sig_top_list_ts = get_bot_signals()
-            if account_dict['signal_top_pairs'].lower() in ["min", "max"]:
+            if str(account_dict['signal_top_pairs']).lower() in ["min", "max"]:
                 sig_top_list = get_pairs_with_top_signals_by_profit(signals_list, profit_indicator = account_dict['signal_top_pairs'].lower())
             else:
                 sig_top_list = get_pairs_with_top_signals(signals_list)

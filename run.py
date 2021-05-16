@@ -137,7 +137,7 @@ parser.add_argument("--beep", help='Beep when issues detected', action='store_tr
 parser.add_argument("--colors", help='Add colors if system supports it', action='store_true', default=None)
 
 parser.add_argument("--my_top_pairs", help="A list of pairs ordered from best down, e.g. --pairs EOS ENJ AXS", nargs='+', default=None)
-parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs (optional min or max to sory by profit %)',type=str, nargs='?', const="by_count", default=None)
+parser.add_argument("--signal_top_pairs", help='Use signal count from BlockParty to order pairs (optional min or max to sory by profit percent)',type=str, nargs='?', const="by_count", default=None)
 parser.add_argument("--signal_top_pairs_rnd", help='Use signal count from BlockParty to order pairs and randomize first n', type=int)
 
 parser.add_argument("--keep_running", help='Loop forever (Ctrl+c to stop)', action='store_true', default=None)
@@ -326,8 +326,8 @@ def run_account(account_dict, bots):
         ret['Positions delta'] = f"Positions delta ({bots_pairs_to_start}) = target ({round(max_bot_pairs)}) - running ({active_positions_count})"
 
         if margin_ratio >= account_dict['stop_at']: # If MR is larger than or equals stop at, stop all bots...
-            print(f"{RED}Hight margin_ratio, stopping bots...{ENDC}")
-            ret['output'] += f"{RED}Hight margin_ratio, stopping bots...{ENDC}\n"
+            print(f"{RED}High margin ratio, stopping bots...{ENDC}")
+            ret['output'] += f"{RED}High margin ratio, stopping bots...{ENDC}\n"
             stop_all_bots(bots, account_id, account_dict['dry'])
             if do_ifttt and margin_ratio >= 5: # Or should we check stop_at * 2
                 import urllib.request
@@ -345,8 +345,8 @@ def run_account(account_dict, bots):
                                 ret['output'] += f"Starting {bot_to_start} bot pairs...\n"
                                 start_bot_pair(bots, account_id, bot_to_start, account_dict['dry'], strategy = strategy)
                     else:
-                        print(f"{YELLOW}Hight margin_ratio, not starting any bots...{ENDC}")
-                        ret['output'] += f"{YELLOW}Hight margin_ratio, not starting any bots...{ENDC}\n"
+                        print(f"{YELLOW}High margin ratio, not starting any bots...{ENDC}")
+                        ret['output'] += f"{YELLOW}High margin ratio, not starting any bots...{ENDC}\n"
                 else: # no stopped bots with positions to start, start from ones without active positions
                     if account_dict['verbose']: print (f"Need to have a max of {max_bots_running} stopped bot pairs...")
 
@@ -406,17 +406,17 @@ def run_account(account_dict, bots):
                                     ret['output'] += f"Starting {bot_to_start} bot pairs...\n"
                                     start_bot_pair(bots, account_id, bot_to_start, account_dict['dry'], strategy = strategy)
                             else:
-                                print(f"{YELLOW}Hight margin_ratio, not starting any bots...{ENDC}")
-                                ret['output'] += f"{YELLOW}Hight margin_ratio, not starting any bots...{ENDC}\n"
+                                print(f"{YELLOW}High margin ratio, not starting any bots...{ENDC}")
+                                ret['output'] += f"{YELLOW}High margin ratio, not starting any bots...{ENDC}\n"
 
             elif bots_pairs_to_start < 0: # running too much positions
                 if account_dict['no_start']:
-                    print("Hight positions count, stopping all running bots...")
-                    ret['output'] += "Hight positions count, stopping all running bots..."
+                    print("High positions count, stopping all running bots...")
+                    ret['output'] += "High positions count, stopping all running bots..."
                     stop_all_bots(bots, account_id, account_dict['dry'])
                 else:
-                    print(f"Hight positions count, stopping {len(started_bots_without_positions)} bots without positions")
-                    ret['output'] += f"Hight positions count, stopping {len(started_bots_without_positions)} bots without positions\n"
+                    print(f"High positions count, stopping {len(started_bots_without_positions)} bots without positions")
+                    ret['output'] += f"High positions count, stopping {len(started_bots_without_positions)} bots without positions\n"
                     for bot_to_stop in started_bots_without_positions:
                         print(f"Stopping {bot_to_stop} bot pairs...")
                         ret['output'] += f"Stopping {bot_to_stop} bot pairs...\n"
@@ -469,6 +469,7 @@ def run_account(account_dict, bots):
 #----------------------------------
 
 signal.signal(signal.SIGINT, signal_handler)
+listen()
 
 print ("-----------------------------------------------------------------")
 print ("-----------------------------------------------------------------")

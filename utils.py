@@ -805,6 +805,7 @@ def show_deals_positions(deals, positions, zeroSO = [], colors = True, unicode =
         # Special case handeling
         if "error" in error_message.lower():
             txt += f"{RED}Detected error in deal ID {ad['id']}{ENDC}\n"
+            '''
             if xfloat(ad['actual_profit_percentage']) > 0.01:
                 txt += f"{GREEN}Detected +ve profit ({xfloat(ad['actual_profit_percentage']):0.2f}%) in deal ID {ad['id']}{ENDC}\n"
                 txt += f"{YELLOW}Panic Selling deal ID {ad['id']} at {xfloat(ad['actual_profit_percentage']):0.2f}%{ENDC}\n"
@@ -817,6 +818,7 @@ def show_deals_positions(deals, positions, zeroSO = [], colors = True, unicode =
                 txt += f"{RED}Detected -ve profit ({xfloat(ad['actual_profit_percentage']):0.2f}%) in deal ID {ad['id']}{ENDC}\n"
                 txt += f"{RED}********* Manual action needed *********{ENDC}\n"
                 beep(3)
+            '''
         #elif ad['current_active_safety_orders_count'] == 0:
         #    txt += "Detected zero active SO count...\n"
         #    txt += f"{ad}\n" ### Testing to see if we can identify if this is an issue or not...

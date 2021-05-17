@@ -584,6 +584,10 @@ while True:
                         print("*************************", file=myfile)
                     print (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), file=myfile)
         
+        if args.summary:
+            with open(f"run_summary.txt", "a") as myfile:
+                print (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), file=myfile)
+
         if min(ret_margin_ratio) > sub_account['stop_at'] and args.keep_running_dynamic_timer:
             keep_running_timer *= 3
         sys.stdout.flush()

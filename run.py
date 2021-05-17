@@ -151,7 +151,10 @@ parser.add_argument("--dynamic_ttp_so_trigger", help='SO to trigger dynamica TTP
 parser.add_argument("--dynamic_ttp", help='TTP to set dynamica TTP to (default: 1.0)', type=float, default=1.0)
 parser.add_argument("--default_ttp", help='default TTP for bots, if is different, not dynamic TTP will be altered (default: 0.42)', type=float, default=0.42)
 
+
 parser.add_argument("--report", help='Log summary report of each account', action='store_true', default=None)
+parser.add_argument("--summary", help='Log summary report of all accounts', action='store_true', default=None)
+
 
 parser.add_argument("--config_filename", help='Use custom config file (default is run_config.py)', default="run_config.py")
 
@@ -335,6 +338,8 @@ def run_account(account_dict, bots):
         ret['Margin Balance'] = f"Margin Balance = ${totalMarginBalance:<.2f} (${totalMaintMargin:<.2f}) : USDT Furures (Spot) = ${availableBalanceUSDT:<.2f} $({usdt_spot_total_balance:<.2f})"
         ret['Bots Active/Total'] = f"Bots Active/Total: {active_bot_pair_count}/{total_bot_pair_count} ({dns_bot_pair_count} dns)"
         ret['Positions delta'] = f"Positions delta ({bots_pairs_to_start}) = target ({round(max_bot_pairs)}) - running ({active_positions_count})"
+        
+        ret['summary'] = f"MR = {margin_ratio:0.2f}% - {ret['Bots Active/Total']} - target ({round(max_bot_pairs)}) - running ({active_positions_count})"
 
         if margin_ratio >= account_dict['stop_at']: # If MR is larger than or equals stop at, stop all bots...
             print(f"{RED}High margin ratio, stopping bots...{ENDC}")
@@ -501,7 +506,7 @@ try:
         for binance_account_flag in args_binance_account_flag:
             if binance_account_flag in Binance_API['account_name']:
                 found_account = True
-                account, account_txt = getAccountID(Binance_API['account_name'])
+                account, account_txt, account_info = getAccountID(Binance_API['account_name'])
                 if account == "" or account_txt == "":
                     print("Error: Need to find account before proceeding...")
                     exit(1)
@@ -512,6 +517,7 @@ try:
                     ,'Binance_API_SECRET': Binance_API['Binance_API_SECRET']
                     ,'3Commas_Account_ID': account
                     ,'3Commas_Account_Txt': f"{account_txt}"
+                    ,'3Commas_Account_Info': account_info
                     }
 
                 for arg in vars(args):
@@ -544,6 +550,13 @@ while True:
         ret_beep = False
         if args.auto or args.show_bots or args.show_all:
             bots = get_bots()
+
+
+        if args.summary:
+            with open(f"run_summary.txt", "a") as myfile:
+                print (f"-----------------------------------------------------------------", file=myfile)
+
+
         for sub_account in accountAPIs:
             print ("-----------------------------------------------------------------")
             print (sub_account['3Commas_Account_Txt'])
@@ -551,6 +564,9 @@ while True:
             ret = run_account(sub_account, bots)
             ret_margin_ratio.append(ret['margin_ratio'])
             ret_beep = ret['beep'] or ret_beep
+            if sub_account['summary']:
+                with open(f"run_summary.txt", "a") as myfile:
+                    print (f"{sub_account['3Commas_Account_Info']['name']} - {ret['summary']}", file=myfile)
             if sub_account['report']:
                 with open(f"run_report_{sub_account['3Commas_Account_ID']}.txt", "a") as myfile:
                     print ("-----------------------------------------------------------------", file=myfile)

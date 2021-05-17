@@ -576,17 +576,20 @@ def getAccountID(binance_account_flag):
     account_id = ""
     account_txt = ""
     accounts_found = ""
+    account_info = {}
     for account in accounts:
         accounts_found += f"{account['exchange_name']}\t:\t{account['name']}\n"
         if account['exchange_name'] == "Binance Futures USDT-M" and binance_account_flag in account['name']:
             txt = f"Using {account['name']} from exchange {account['exchange_name']}"
             account_id = account['id']
             account_txt = txt
+            account_info['name'] = account['name']
+            account_info['exchange_name'] = account['exchange_name']
             found = True
     if not found:
         print(f"ERROR: Expected to find {binance_account_flag} in 3Commas account names:")
         print(accounts_found)
-    return account_id, account_txt
+    return account_id, account_txt, account_info
 
 
 
@@ -821,7 +824,7 @@ def show_deals_positions(deals, positions, account_dict, zeroSO = [], colors = T
                 txt += f"{YELLOW}Panic Selling deal ID {ad['id']} at {xfloat(ad['actual_profit_percentage']):0.2f}%{ENDC}\n"
                 #txt += "********* DRY No-Op*********\n"
                 panicSell = get3CommasAPI().panicSellDeal(DEAL_ID=f"{ad['id']}")
-                print(panicSell)
+                #print(panicSell)
                 #txt += f"{panicSell}\n"
                 beep(3)
             else:

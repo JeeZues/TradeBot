@@ -657,10 +657,10 @@ def show_deals(deals):
 
 
 #@timing
-def show_deals_positions(deals, positions, zeroSO = [], colors = True, unicode = True):
+def show_deals_positions(deals, positions, account_dict, zeroSO = [], colors = True, unicode = True):
 
     newZeroSO = []
-    if colors:
+    if account_dict['colors']:
         ENDC   = '\033[0m'
         RED    = '\033[91m'
         GREEN  = '\033[92m'
@@ -801,6 +801,16 @@ def show_deals_positions(deals, positions, zeroSO = [], colors = True, unicode =
             deal_position['color'] = GREEN
         txt += f"{color}{ad['pair'].replace('USDT_',''):6} {xfloat(ad['actual_profit_percentage']):6.2f}% {position_txt} c{ad['completed_safety_orders_count']} a{ad['current_active_safety_orders_count']} m{ad['max_safety_orders']} ${xfloat(ad['bought_volume']):7.2f} ${reserved_cost:7.2f} ${xfloat(ad['current_price']):6.2f} ${xfloat(ad['take_profit_price']):6.2f} {age} {a_flag}{error_message}{ENDC}\n"
 
+
+        if account_dict['enable_dynamic_ttp']:
+            if ad['completed_safety_orders_count'] >= account_dict['dynamic_ttp_so_trigger'] and xfloat(ad['take_profit']) == account_dict['default_ttp'] and xfloat(ad['take_profit']) < account_dict['dynamic_ttp']:
+                txt += f"{BLINK}Updating TTP for {ad['id']} (SOs: {ad['completed_safety_orders_count']}) from {ad['take_profit']} to {account_dict['dynamic_ttp']}{ENDC}\n"
+                if not account_dict['dry']:
+                    ud = get3CommasAPI().updateDeal(DEAL_ID=f"{ad['id']}", OPTIONS=f"?take_profit={account_dict['dynamic_ttp']}")
+                    txt += f"{BLINK}New TTP is {ud['take_profit']}{ENDC}\n"
+                else:
+                    txt += f"{BLINK}DRY{ENDC}\n"
+            
 
         # Special case handeling
         if "error" in error_message.lower():

@@ -16,6 +16,7 @@ class API3Commas():
             'getBots': {'url': '/public/api/ver1/botsOPTIONS', 'method': 'GET'},
             'getDeals': {'url': '/public/api/ver1/dealsOPTIONS', 'method': 'GET'},
             'getDeal': {'url': '/public/api/ver1/deals/DEAL_ID/showOPTIONS', 'method': 'GET'},
+            'updateDeal': {'url': '/public/api/ver1/deals/DEAL_ID/update_dealOPTIONS', 'method': 'PATCH'},
             'panicSellDeal': {'url': '/public/api/ver1/deals/DEAL_ID/panic_sell', 'method': 'POST'},
             'disableBot': {'url': '/public/api/ver1/bots/BOT_ID/disable', 'method': 'POST'},
             'enableBot': {'url': '/public/api/ver1/bots/BOT_ID/enable', 'method': 'POST'},

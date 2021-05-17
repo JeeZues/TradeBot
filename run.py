@@ -145,6 +145,12 @@ parser.add_argument("--keep_running_timer", help='Time to sleep between runs in 
 parser.add_argument("--keep_running_dynamic_timer", help='Adjust timer based on state to reduce load on APIs', action='store_true', default=None)
 parser.add_argument("--no_start", help='Run in safe mode (as a backup) with different values to make sure to stop (and not start) bots', action='store_true', default=None)
 
+# Dynamic TTP args
+parser.add_argument("--enable_dynamic_ttp", help='Enable dynamically altering TTP for deals with at least (default) 5 SOs...', action='store_true', default=None)
+parser.add_argument("--dynamic_ttp_so_trigger", help='SO to trigger dynamica TTP (default: 5)', type=int, default=5)
+parser.add_argument("--dynamic_ttp", help='TTP to set dynamica TTP to (default: 1.0)', type=float, default=1.0)
+parser.add_argument("--default_ttp", help='default TTP for bots, if is different, not dynamic TTP will be altered (default: 0.42)', type=float, default=0.42)
+
 parser.add_argument("--report", help='Log summary report of each account', action='store_true', default=None)
 
 parser.add_argument("--config_filename", help='Use custom config file (default is run_config.py)', default="run_config.py")
@@ -155,7 +161,6 @@ parser.add_argument("--debug", help='debug', action='store_true', default=None)
 parser.add_argument("--verbose", help='Verbose output', action='store_true', default=None)
 
 args = parser.parse_args()
-
 
 # Allow importing run_config from different locations using path
 spec = importlib.util.spec_from_file_location("module.name", args.config_filename)
@@ -168,7 +173,13 @@ spec.loader.exec_module(run_config)
 if args.start_at >= args.stop_at:
     print("Error: start_at can't be more than or equal to stop_at")
     exit(1)
-
+'''
+enable_dynamic_ttp = None
+if args.enable_dynamic_ttp:
+    enable_dynamic_ttp['dynamic_ttp_so_trigger'] = args.dynamic_ttp_so_trigger
+    enable_dynamic_ttp['dynamic_ttp'] = args.dynamic_ttp
+    enable_dynamic_ttp['default_ttp'] = args.default_ttp
+'''
 #----------------------------------
 
 beep_time = 10
@@ -447,7 +458,7 @@ def run_account(account_dict, bots):
     if account_dict['show_deals'] or account_dict['show_positions'] or account_dict['show_all']:
         try:
             deals=get3CommasAPI().getDeals(OPTIONS=f"?account_id={account_id}&scope=active&limit=100")
-            show_deals_positions_txt, zeroSO = show_deals_positions(deals, account['positions'], account_dict['colors'])
+            show_deals_positions_txt, zeroSO = show_deals_positions(deals, account['positions'], account_dict, colors = account_dict['colors'])
             ret['show_deals_positions'] = show_deals_positions_txt
             print(show_deals_positions_txt)
             if "Error" in show_deals_positions_txt:
@@ -462,6 +473,7 @@ def run_account(account_dict, bots):
 
     ret['margin_ratio'] = margin_ratio
     return ret
+
 
 
 #----------------------------------

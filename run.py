@@ -339,7 +339,7 @@ def run_account(account_dict, bots):
         ret['Bots Active/Total'] = f"Bots Active/Total: {active_bot_pair_count}/{total_bot_pair_count} ({dns_bot_pair_count} dns)"
         ret['Positions delta'] = f"Positions delta ({bots_pairs_to_start}) = target ({round(max_bot_pairs)}) - running ({active_positions_count})"
         
-        ret['summary'] = f"MR = {margin_ratio:0.2f}% - {ret['Bots Active/Total']} - target ({round(max_bot_pairs)}) - running ({active_positions_count})"
+        ret['summary'] = f"MR = {margin_ratio:0.2f}% - Bots Active/Total: {active_bot_pair_count:2}/{total_bot_pair_count:3} ({dns_bot_pair_count:2} dns) - target ({round(max_bot_pairs):2}) - running ({active_positions_count:2})"
 
         if margin_ratio >= account_dict['stop_at']: # If MR is larger than or equals stop at, stop all bots...
             print(f"{RED}High margin ratio, stopping bots...{ENDC}")
@@ -566,7 +566,7 @@ while True:
             ret_beep = ret['beep'] or ret_beep
             if sub_account['summary']:
                 with open(f"run_summary.txt", "a") as myfile:
-                    print (f"{sub_account['3Commas_Account_Info']['name']} - {ret['summary']}", file=myfile)
+                    print (f"{sub_account['3Commas_Account_Info']['id']} - {sub_account['3Commas_Account_Info']['name']:40} - {ret['summary']}", file=myfile)
             if sub_account['report']:
                 with open(f"run_report_{sub_account['3Commas_Account_ID']}.txt", "a") as myfile:
                     print ("-----------------------------------------------------------------", file=myfile)

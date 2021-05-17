@@ -585,6 +585,7 @@ def getAccountID(binance_account_flag):
             account_txt = txt
             account_info['name'] = account['name']
             account_info['exchange_name'] = account['exchange_name']
+            account_info['id'] = account['id']
             found = True
     if not found:
         print(f"ERROR: Expected to find {binance_account_flag} in 3Commas account names:")

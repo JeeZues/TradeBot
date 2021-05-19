@@ -148,9 +148,9 @@ def get_margin_ratio(a_data):
     try:
         return float(a_data['totalMaintMargin']) / float(a_data['totalMarginBalance']) * 100
     except Exception as e:
-        print(e)
-        traceback.print_exc()
-        return 0
+        #print(e)
+        #traceback.print_exc()
+        return 0.0
 
 
 #@timing

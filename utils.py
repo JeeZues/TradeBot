@@ -10,6 +10,12 @@ from time import gmtime, strftime
 import random
 from collections import Counter
 
+import os
+
+if os.name == 'nt':
+    from timeout_win import timeout
+else:
+    from timeout import timeout
 
 
 #----------------------------------
@@ -168,6 +174,7 @@ def get_max_bot_pairs(balance, pair_allowance):
 
 
 #@timing
+@timeout(300)
 def get_bots():
     # Get bots in 100/page chunks
     chunks = 100

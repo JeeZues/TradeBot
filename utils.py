@@ -145,8 +145,12 @@ def get_active_positions_count(positions, bots, account_id):
 
 #@timing
 def get_margin_ratio(a_data):
-    return float(a_data['totalMaintMargin']) / float(a_data['totalMarginBalance']) * 100
-
+    try:
+        return float(a_data['totalMaintMargin']) / float(a_data['totalMarginBalance']) * 100
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return 0
 
 
 #@timing

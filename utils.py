@@ -737,7 +737,7 @@ def show_deals_positions(deals, positions, account_dict, zeroSO = [], colors = T
         #    txt += f"{ad}\n"
         #pprint(ad)
     
-        ad_pair = ad['pair'].replace('USDT_','')
+        ad_pair = ad['pair'].replace('USDT_','').replace('USDT','')
         updated_at_ts = datetime.strptime(ad['updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
         updated_at_ts_diff = ts - updated_at_ts
         created_at_ts = datetime.strptime(ad['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -747,7 +747,7 @@ def show_deals_positions(deals, positions, account_dict, zeroSO = [], colors = T
         deal_position = {**ad}
         position_txt = ""
         for position in sorted(positions, key=lambda k: (k['symbol'])):
-            if ad['pair'].replace('USDT_','') == position['symbol'].replace('USDT',''):
+            if ad['pair'].replace('USDT_','').replace('USDT','') == position['symbol'].replace('USDT',''):
                 if xfloat(position['positionAmt']) != 0.0:
                     position_txt = f"{position['positionAmt']:5} {position['entryPrice']:10}"
                     position['positionLeverage'] = position['leverage']
@@ -900,7 +900,7 @@ ICX     -1.02% 58    2.2131     c3 a0 m11 $ 128.41 $   0.00 $  2.19 $  2.22     
         if xfloat(position['positionAmt']) != 0.0:
             found_position_without_deal = False
             for ad in active_deals:
-                if ad['pair'].replace('USDT_','') == position['symbol'].replace('USDT',''):
+                if ad['pair'].replace('USDT_','').replace('USDT','') == position['symbol'].replace('USDT',''):
                     found_position_without_deal = True
             if not found_position_without_deal:
                 txt += f"{position['symbol'].replace('USDT',''):6} {'':7} {position['positionAmt']:5} {position['entryPrice']:10} {RED}No Deal for position found{ENDC}\n"
